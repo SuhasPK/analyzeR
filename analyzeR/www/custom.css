@@ -1,0 +1,20 @@
+.navbar-default {
+  background-color: Magenta;
+  border-color: Magenta;
+}
+
+.navbar-default .navbar-nav > li > a {
+  color: black;  /* Adjust text color as needed */
+}
+
+.navbar-default .navbar-brand {
+  color: black;  /* Adjust brand color as needed */
+}
+
+/* Change the background color and text color of the file input field */
+input[type="text"].form-control,
+input[type="file"].form-control {
+  background-color: black !important;  /* Changes the background color to black */
+  color: white !important;             /* Changes the text color to white */
+  border-color: white !important;      /* Changes the border color to black */
+}

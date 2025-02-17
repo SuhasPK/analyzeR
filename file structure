@@ -1,0 +1,14 @@
+analyzeR/
+│── ui.R               # Handles UI design
+│── server.R           # Handles server logic
+│── global.R           # Loads packages and sources
+│── modules/           # Stores UI & server modules
+│   ├── loadR.R
+│   ├── readR.R
+│   ├── cleanR.R
+│   ├── analyzeR.R
+│   ├── plotR.R
+│   ├── removeR.R
+│── data/              # Stores uploaded & cleaned datasets
+│── www/               # For CSS, JS, and custom assets
+
