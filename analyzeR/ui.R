@@ -7,8 +7,7 @@
 #    http://shiny.rstudio.com/
 #
 
-source("global.R")
-
+# ui.R
 ui <- fluidPage(
   theme = shinytheme("cyborg"),
   includeCSS("www/custom.css"),
@@ -21,3 +20,8 @@ ui <- fluidPage(
              #tabPanel("RemoveR", removeRUI("remove"))
   )
 )
+
+
+
+
+

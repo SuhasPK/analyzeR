@@ -7,14 +7,18 @@
 #    http://shiny.rstudio.com/
 #
 
-source("global.R")
-
+# server.R
 server <- function(input, output, session) {
-  callModule(loadRServer, "load")
-  callModule(readRServer, "read")
+  dataset <- callModule(loadRServer, "load")
+  callModule(readRServer, "read", dataset)
   callModule(cleanRServer, "clean")
   #callModule(analyzeRServer, "analyze")
   callModule(plotRServer, "plot")
   #callModule(removeRServer, "remove")
 }
+
+
+
+
+
 
