@@ -2,10 +2,19 @@
 loadRUI <- function(id) {
   ns <- NS(id)
   tagList(
+    # Custom CSS to decrease the font size of the filename display
+    tags$head(tags$style(HTML("
+      .table-name {
+        font-size: 12px; /* Adjust font size */
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 16px;
+      }
+    "))),
     fileInput(ns("file"), "Upload Dataset", accept = c(".csv", ".txt", ".xlsx", ".tsv")),
     verbatimTextOutput(ns("file_info")),
-    h3("Preview"),
-    div(DTOutput(ns("preview")), style = "width: 50%;")
+    h3(textOutput(ns("table_name")), class = "table-name", style = "text-align: center;"),
+    div(DTOutput(ns("preview")), style = "width: 100%; margin: 0 auto; overflow-x: scroll;")
   )
 }
 
@@ -40,6 +49,12 @@ loadRServer <- function(input, output, session) {
       Size = formatted_size,
       Type = file_type
     )
+  })
+  
+  output$table_name <- renderText({
+    req(input$file)
+    file <- input$file
+    paste("Table:", file$name)
   })
   
   output$preview <- renderDT({

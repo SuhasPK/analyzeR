@@ -1,6 +1,6 @@
 .navbar-default {
-  background-color: Magenta;
-  border-color: Magenta;
+  background-color: #00ff00	;
+  border-color: red;
 }
 
 .navbar-default .navbar-nav > li > a {
@@ -10,6 +10,7 @@
 .navbar-default .navbar-brand {
   color: black;  /* Adjust brand color as needed */
 }
+
 
 /* Change the background color and text color of the file input field */
 input[type="text"].form-control,
@@ -39,3 +40,5 @@ table.dataTable thead th {
   background-color: #343a40;
   color: white;
 }
+
+
