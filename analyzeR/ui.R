@@ -1,13 +1,3 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
-# ui.R
 ui <- fluidPage(
   theme = shinytheme("cyborg"),
   tags$head(
@@ -23,9 +13,13 @@ ui <- fluidPage(
       }
       body {
         font-size: 16px;
-        background-color: #000000; /* Dark background */
-        color: #FFFFFF;           /* Light text */
+        background-color: #000000;
+        color: #FFFFFF;
       }
+      h4 { font-size: 20px; }
+      h5 { font-size: 17px; }
+      .btn { font-size: 15px; padding: 6px 14px; }
+      .nav-tabs .nav-link { font-size: 15px; }
       .title {
         color: lime;
         font-size: 52px;
@@ -52,30 +46,38 @@ ui <- fluidPage(
   titlePanel(
     div(class = "title", "analyzeR")
   ),
-  # First Jumbotron for main panel contents
   div(class = "jumbotron",
-      h2("Welcome to analyzeR!"),
-      div(
-        style = "margin-bottom: 20px;",
-        p("A simple user-friendly web app which lets users upload datasets and start looking for insights.")
-      ),
-      h3("Features"),
-      tags$ul(
-        tags$li("LoadR: Upload your datasets in various formats like CSV, TXT, XLSX, and TSV."),
-        tags$li("ReadR: Get a comprehensive summary of your dataset."),
-        tags$li("CleanR: Perform essential data cleaning operations."),
-        tags$li("PlotR: Create insightful visualizations.")
-      )
+    h2("Welcome to analyzeR!"),
+    div(
+      style = "margin-bottom: 20px;",
+      p("A simple user-friendly web app which lets users upload datasets and start looking for insights.")
+    ),
+    h3("Features"),
+    tags$ul(
+      tags$li("LoadR: Upload your datasets in various formats like CSV, TXT, XLSX, and TSV."),
+      tags$li("ReadR: Get a comprehensive summary of your dataset."),
+      tags$li("CleanR: Perform essential data cleaning operations."),
+      tags$li("AnalyzeR: Run correlation, normality, and outlier analysis."),
+      tags$li("PlotR: Create insightful visualizations with facet support."),
+      tags$li("LearnR: Train ML models, benchmark results, and predict new observations."),
+      tags$li("RemoveR: Clear the dataset from memory.")
+    )
   ),
-  # Second Jumbotron for functionality tabs
   div(class = "jumbotron",
-      h2("Data Operations"),
-      tabsetPanel(
-        id = "tabs",
-        tabPanel("LoadR", loadRUI("load")),
-        tabPanel("ReadR", readRUI("read")),
-        tabPanel("CleanR", cleanRUI("clean")),
-        tabPanel("PlotR", plotRUI("plot"))
-      )
+    h2("Data Operations"),
+    tabsetPanel(
+      id = "tabs",
+      tabPanel("LoadR",    loadRUI("load")),
+      tabPanel("ReadR",    readRUI("read")),
+      tabPanel("CleanR",   cleanRUI("clean")),
+      tabPanel("AnalyzeR", analyzeRUI("analyze")),
+      tabPanel("PlotR",    plotRUI("plot")),
+      tabPanel("LearnR",   learnRUI("learn")),
+      tabPanel("RemoveR",  removeRUI("remove"))
+    )
+  ),
+  tags$footer(
+    style = "text-align: center; padding: 16px; color: #888; font-size: 13px; margin-top: 20px;",
+    paste0("analyzeR v", app_version, " \u2014 Built with R Shiny")
   )
 )

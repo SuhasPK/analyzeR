@@ -41,4 +41,11 @@ table.dataTable thead th {
   color: white;
 }
 
+table.dataTable td, table.dataTable th {
+  font-size: 14px;
+}
+
+.shiny-notification {
+  font-size: 14px;
+}
 

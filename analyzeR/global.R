@@ -1,3 +1,5 @@
+app_version <- "1.1.0"
+
 # Load necessary packages
 library(shiny)
 library(shinythemes)
@@ -11,6 +13,13 @@ library(tibble)
 library(ggplot2)
 library(ggdark)
 
+# ML packages (install if missing):
+#   install.packages(c("rpart", "randomForest", "e1071", "class"))
+library(rpart)
+library(randomForest)
+library(e1071)
+library(class)
+
 
 # Custom summary function
 custom_summary <- function(df) {
@@ -22,7 +31,6 @@ custom_summary <- function(df) {
     `3rd Qu.` = sapply(df, function(x) if(is.numeric(x)) quantile(x, 0.75, na.rm = TRUE) else NA),
     Max = sapply(df, function(x) if(is.numeric(x)) max(x, na.rm = TRUE) else NA),
     `Null Count` = sapply(df, function(x) sum(is.na(x)))
-    
   )
   rownames(summary_df) <- names(df)
   return(summary_df)
@@ -35,3 +43,4 @@ source("modules/cleanR.R")
 source("modules/analyzeR.R")
 source("modules/plotR.R")
 source("modules/removeR.R")
+source("modules/learnR.R")

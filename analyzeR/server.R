@@ -1,24 +1,15 @@
-#
-# This is the server logic of a Shiny web application. You can run the
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
-# server.R
 server <- function(input, output, session) {
-  dataset <- callModule(loadRServer, "load")
-  callModule(readRServer, "read", dataset)
-  callModule(cleanRServer, "clean")
-  #callModule(analyzeRServer, "analyze")
-  callModule(plotRServer, "plot")
-  #callModule(removeRServer, "remove")
+  rv            <- reactiveValues(data = NULL)
+  reset_counter <- reactiveVal(0L)
+
+  raw_dataset <- callModule(loadRServer, "load", reactive(reset_counter()))
+
+  observe({ rv$data <- raw_dataset() })
+
+  callModule(readRServer,    "read",    reactive(rv$data))
+  callModule(cleanRServer,   "clean",   rv)
+  callModule(analyzeRServer, "analyze", reactive(rv$data))
+  callModule(plotRServer,    "plot",    reactive(rv$data))
+  callModule(learnRServer,   "learn",   reactive(rv$data))
+  callModule(removeRServer,  "remove",  rv, reset_counter)
 }
-
-
-
-
-
-
