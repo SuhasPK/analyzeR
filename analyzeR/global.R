@@ -74,6 +74,8 @@ if (.base64_available) library(base64enc)
 library(rpart)
 library(e1071)
 library(class)
+# nnet — multinomial logistic regression for multi-class classification in learnR
+library(nnet)
 
 # ranger (fast RF) vs randomForest (fallback) — chosen at startup
 .ranger_available <- requireNamespace("ranger",       quietly = TRUE)

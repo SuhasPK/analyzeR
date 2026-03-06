@@ -1,10 +1,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # textR.R  —  NLP / Text Analysis module
 #
-# Packages required: tidytext, textdata
-#   install.packages(c("tidytext", "textdata"))
-#
-# Analyses: word frequency, bigrams, Bing sentiment
+# Required : tidytext, textdata
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Module UI ──────────────────────────────────────────────────────────────────
@@ -41,7 +38,6 @@ textRServer <- function(id, dataset, reset_trigger, report_rv = NULL) {
       .no_data_ui()
     })
 
-    # Populate selector with character/factor columns
     observe({
       req(dataset())
       df       <- dataset()
@@ -51,13 +47,9 @@ textRServer <- function(id, dataset, reset_trigger, report_rv = NULL) {
                         selected = if (length(txt_cols) > 0) txt_cols[1] else NULL)
     })
 
-    # Disable button when no data or no text columns
     observe({
       has_data <- !is.null(dataset())
-      if (!has_data) {
-        shinyjs::disable("analyze_btn")
-        return()
-      }
+      if (!has_data) { shinyjs::disable("analyze_btn"); return() }
       df       <- dataset()
       txt_cols <- names(df)[sapply(df, function(x) is.character(x) || is.factor(x))]
       if (length(txt_cols) == 0) shinyjs::disable("analyze_btn")
@@ -70,23 +62,7 @@ textRServer <- function(id, dataset, reset_trigger, report_rv = NULL) {
       updateSelectInput(session, "text_col", choices = character(0), selected = NULL)
     })
 
-    # Mirror text results into report_rv when analysis is run.
-    # Fires after text_data() is set; freq_df() and sentiment_df() are now ready.
-    observeEvent(text_data(), {
-      if (is.null(report_rv) || is.null(text_data())) return()
-      report_rv$text_col  <- text_data()$col
-      report_rv$text_freq <- tryCatch(freq_df(), error = function(e) NULL)
-      sent <- tryCatch(sentiment_df(), error = function(e) NULL)
-      if (!is.null(sent) && nrow(sent) > 0) {
-        report_rv$text_sentiment <- list(
-          n_pos = sum(sent$sentiment == "positive"),
-          n_neg = sum(sent$sentiment == "negative"),
-          net   = sum(sent$sentiment == "positive") - sum(sent$sentiment == "negative"),
-          df    = sent
-        )
-      }
-    }, ignoreNULL = TRUE, ignoreInit = TRUE)
-
+    # ── Analyze button ─────────────────────────────────────────────────
     observeEvent(input$analyze_btn, {
       req(dataset(), input$text_col)
       df  <- dataset()
@@ -105,7 +81,7 @@ textRServer <- function(id, dataset, reset_trigger, report_rv = NULL) {
         return()
       }
 
-      n_orig <- length(texts)
+      n_orig   <- length(texts)
       text_cap <- 50000L
       if (n_orig > text_cap) {
         set.seed(42L)
@@ -123,7 +99,10 @@ textRServer <- function(id, dataset, reset_trigger, report_rv = NULL) {
       show_text(TRUE)
     })
 
-    # ── Results scaffold ──────────────────────────────────────────────────
+    # ── Results scaffold ───────────────────────────────────────────────
+    # NOTE: Word Cloud tab uses inline conditional content — do NOT pre-assign
+    # tabPanel to a variable and pass it to tabsetPanel, as this causes Shiny
+    # to mis-serialize the tag and display "[object Object]" in the browser.
     output$text_results <- renderUI({
       if (!show_text()) {
         return(div(style = "color:#555; margin-top:60px; text-align:center; font-size:15px;",
@@ -153,11 +132,11 @@ textRServer <- function(id, dataset, reset_trigger, report_rv = NULL) {
           withSpinner(plotOutput(ns("sentiment_plot"), height = "420px")),
           br(),
           withSpinner(DTOutput(ns("sentiment_table")))
-        )
+        ),
       )
     })
 
-    # ── Overview ────────────────────────────────────────────────────────────
+    # ── Overview ──────────────────────────────────────────────────────
     output$overview_table <- renderDT({
       req(text_data())
       td       <- text_data()
@@ -166,13 +145,13 @@ textRServer <- function(id, dataset, reset_trigger, report_rv = NULL) {
       n_used   <- td$n_used %||% length(texts)
       all_text <- paste(texts, collapse = " ")
 
-      words_raw <- unlist(strsplit(tolower(all_text), "\\s+"))
-      words_raw <- words_raw[nchar(words_raw) > 0]
+      words_raw    <- unlist(strsplit(tolower(all_text), "\\s+"))
+      words_raw    <- words_raw[nchar(words_raw) > 0]
       word_count   <- length(words_raw)
       unique_words <- length(unique(words_raw))
 
-      sents     <- unlist(strsplit(all_text, "[.!?]+"))
-      sents     <- sents[nchar(trimws(sents)) > 0]
+      sents      <- unlist(strsplit(all_text, "[.!?]+"))
+      sents      <- sents[nchar(trimws(sents)) > 0]
       sent_count <- length(sents)
 
       lex_div <- if (word_count > 0) round(unique_words / word_count, 4) else 0
@@ -181,8 +160,7 @@ textRServer <- function(id, dataset, reset_trigger, report_rv = NULL) {
       stop_w      <- tidytext::stop_words$word
       clean_words <- words_raw[!words_raw %in% stop_w & nchar(words_raw) > 1]
       most_common <- if (length(clean_words) > 0) {
-        wf <- sort(table(clean_words), decreasing = TRUE)
-        names(wf)[1]
+        names(sort(table(clean_words), decreasing = TRUE))[1]
       } else "\u2014"
 
       base_metrics <- c("Total Characters", "Total Words", "Sentences",
@@ -190,50 +168,45 @@ textRServer <- function(id, dataset, reset_trigger, report_rv = NULL) {
                         "Most Common Word (excl. stopwords)")
       base_values  <- c(
         format(nchar(all_text), big.mark = ","),
-        format(word_count, big.mark = ","),
-        format(sent_count, big.mark = ","),
-        format(unique_words, big.mark = ","),
+        format(word_count,      big.mark = ","),
+        format(sent_count,      big.mark = ","),
+        format(unique_words,    big.mark = ","),
         as.character(lex_div),
         as.character(avg_wl),
         most_common
       )
 
       if (n_used < n_orig) {
-        base_metrics <- c("Rows in dataset", "Rows analyzed (sample, seed=42)",
-                          base_metrics)
-        base_values  <- c(format(n_orig, big.mark = ","),
-                          format(n_used, big.mark = ","),
+        base_metrics <- c("Rows in dataset", "Rows analyzed (sample, seed=42)", base_metrics)
+        base_values  <- c(format(n_orig, big.mark = ","), format(n_used, big.mark = ","),
                           base_values)
       }
 
-      df <- data.frame(Metric = base_metrics, Value = base_values,
-                       stringsAsFactors = FALSE)
-
+      df <- data.frame(Metric = base_metrics, Value = base_values, stringsAsFactors = FALSE)
       datatable(df, rownames = FALSE,
         options = list(pageLength = 10, dom = "t", scrollX = TRUE),
         class = "display compact cell-border")
     })
 
-    # ── Word Frequency ──────────────────────────────────────────────────────
+    # ── Word Frequency ─────────────────────────────────────────────────
     freq_df <- reactive({
       req(text_data())
       texts  <- text_data()$texts
       raw_df <- data.frame(text = texts, stringsAsFactors = FALSE)
-
       tokens <- tidytext::unnest_tokens(raw_df, word, text)
       tokens <- dplyr::anti_join(tokens, tidytext::stop_words, by = "word")
       tokens <- tokens[nchar(tokens$word) > 1, , drop = FALSE]
-
-      wf      <- dplyr::count(tokens, word, sort = TRUE)
-      wf$pct  <- round(100 * wf$n / sum(wf$n), 2)
+      wf     <- dplyr::count(tokens, word, sort = TRUE)
+      wf$pct <- round(100 * wf$n / sum(wf$n), 2)
       wf
     })
 
-    output$freq_plot <- renderPlot({
-      req(freq_df(), nrow(freq_df()) > 0)
-      df       <- head(freq_df(), 30)
+    freq_plot_obj <- reactive({
+      req(text_data())
+      df <- freq_df()
+      validate(need(nrow(df) > 0, "No words remain after removing stopwords."))
+      df       <- head(df, 30)
       df$word  <- factor(df$word, levels = rev(df$word))
-
       ggplot2::ggplot(df, ggplot2::aes(x = word, y = n)) +
         ggplot2::geom_bar(stat = "identity", fill = "#00ff00", alpha = 0.85, color = "black") +
         ggplot2::coord_flip() +
@@ -241,42 +214,43 @@ textRServer <- function(id, dataset, reset_trigger, report_rv = NULL) {
         ggplot2::labs(title = "Top 30 Words (stopwords removed)", x = NULL, y = "Count")
     })
 
+    output$freq_plot <- renderPlot({ req(show_text()); freq_plot_obj() })
+
     output$freq_table <- renderDT({
-      req(freq_df(), nrow(freq_df()) > 0)
+      req(show_text(), text_data())
       df <- freq_df()
+      validate(need(nrow(df) > 0, "No words found."))
       names(df) <- c("Word", "Count", "Pct%")
       datatable(df, rownames = FALSE,
         options = list(pageLength = 15, scrollX = TRUE, dom = "ftp"),
         class = "display compact cell-border stripe hover")
     })
 
-    # ── N-grams (Bigrams) ────────────────────────────────────────────────────
+    # ── N-grams (Bigrams) ─────────────────────────────────────────────
     ngram_df <- reactive({
       req(text_data())
-      texts  <- text_data()$texts
-      raw_df <- data.frame(text = texts, stringsAsFactors = FALSE)
-
+      texts   <- text_data()$texts
+      raw_df  <- data.frame(text = texts, stringsAsFactors = FALSE)
       bigrams <- tidytext::unnest_tokens(raw_df, bigram, text, token = "ngrams", n = 2)
-
-      stop_w      <- tidytext::stop_words$word
-      bigrams_sep <- tidyr::separate(bigrams, col = "bigram",
-                                     into = c("word1", "word2"), sep = " ")
-      bigrams_sep <- bigrams_sep[
-        !is.na(bigrams_sep$word1) & !is.na(bigrams_sep$word2) &
-        !bigrams_sep$word1 %in% stop_w & !bigrams_sep$word2 %in% stop_w &
-        nchar(bigrams_sep$word1) > 1  & nchar(bigrams_sep$word2) > 1, ]
-
-      bigrams_sep$bigram <- paste(bigrams_sep$word1, bigrams_sep$word2)
-      bf      <- dplyr::count(bigrams_sep, bigram, sort = TRUE)
-      bf$pct  <- round(100 * bf$n / sum(bf$n), 2)
+      stop_w  <- tidytext::stop_words$word
+      bg      <- tidyr::separate(bigrams, col = "bigram",
+                                 into = c("word1", "word2"), sep = " ")
+      bg <- bg[
+        !is.na(bg$word1) & !is.na(bg$word2) &
+        !bg$word1 %in% stop_w & !bg$word2 %in% stop_w &
+        nchar(bg$word1) > 1 & nchar(bg$word2) > 1, ]
+      bg$bigram <- paste(bg$word1, bg$word2)
+      bf        <- dplyr::count(bg, bigram, sort = TRUE)
+      bf$pct    <- round(100 * bf$n / sum(bf$n), 2)
       bf
     })
 
-    output$ngram_plot <- renderPlot({
-      req(ngram_df(), nrow(ngram_df()) > 0)
-      df        <- head(ngram_df(), 20)
+    ngram_plot_obj <- reactive({
+      req(text_data())
+      df <- ngram_df()
+      validate(need(nrow(df) > 0, "No bigrams found after removing stopwords."))
+      df        <- head(df, 20)
       df$bigram <- factor(df$bigram, levels = rev(df$bigram))
-
       ggplot2::ggplot(df, ggplot2::aes(x = bigram, y = n)) +
         ggplot2::geom_bar(stat = "identity", fill = "#00bfff", alpha = 0.85, color = "black") +
         ggplot2::coord_flip() +
@@ -284,46 +258,71 @@ textRServer <- function(id, dataset, reset_trigger, report_rv = NULL) {
         ggplot2::labs(title = "Top 20 Bigrams (stopwords removed)", x = NULL, y = "Count")
     })
 
+    output$ngram_plot  <- renderPlot({ req(show_text()); ngram_plot_obj() })
+
     output$ngram_table <- renderDT({
-      req(ngram_df(), nrow(ngram_df()) > 0)
+      req(show_text(), text_data())
       df <- ngram_df()
+      validate(need(nrow(df) > 0, "No bigrams found."))
       names(df) <- c("Bigram", "Count", "Pct%")
       datatable(df, rownames = FALSE,
         options = list(pageLength = 15, scrollX = TRUE, dom = "ftp"),
         class = "display compact cell-border stripe hover")
     })
 
-    # ── Sentiment ────────────────────────────────────────────────────────────
-    sentiment_df <- reactive({
+    # ── Sentiment ─────────────────────────────────────────────────────
+    # Single reactive returns list(err=<msg|NULL>, df=<data.frame|NULL>).
+    # No reactiveVal writes — avoids Shiny re-entrancy / side-effect bugs.
+    sent_result <- reactive({
       req(text_data())
-      texts  <- text_data()$texts
-      raw_df <- data.frame(text = texts, stringsAsFactors = FALSE)
+      tryCatch({
+        texts  <- text_data()$texts
+        raw_df <- data.frame(text = texts, stringsAsFactors = FALSE)
+        tokens <- tidytext::unnest_tokens(raw_df, word, text)
+        tokens <- dplyr::anti_join(tokens, tidytext::stop_words, by = "word")
 
-      tokens <- tidytext::unnest_tokens(raw_df, word, text)
-      tokens <- dplyr::anti_join(tokens, tidytext::stop_words, by = "word")
+        bing_or_err <- tryCatch(
+          list(ok = TRUE, lex = tidytext::get_sentiments("bing")),
+          error = function(e) {
+            msg <- conditionMessage(e)
+            errmsg <- if (grepl("textdata", msg, ignore.case = TRUE))
+              "The 'textdata' package is required. Install it: install.packages('textdata')"
+            else if (grepl("download|lexicon|dataset", msg, ignore.case = TRUE))
+              "Bing lexicon not downloaded. Run textdata::lexicon_bing() in your R console."
+            else
+              paste0("Could not load Bing lexicon: ", msg)
+            list(ok = FALSE, err = errmsg)
+          }
+        )
 
-      bing <- tryCatch(
-        tidytext::get_sentiments("bing"),
-        error = function(e) {
-          showNotification(
-            "Bing lexicon unavailable. Install textdata: install.packages('textdata')",
-            type = "error", duration = 8)
-          NULL
-        })
-      if (is.null(bing)) return(data.frame())
+        if (!isTRUE(bing_or_err$ok))
+          return(list(err = bing_or_err$err, df = NULL))
 
-      dplyr::inner_join(tokens, bing, by = "word")
+        result <- dplyr::inner_join(tokens, bing_or_err$lex, by = "word")
+
+        if (nrow(result) == 0)
+          return(list(
+            err = "No sentiment words matched. Check that the column contains English prose.",
+            df  = result
+          ))
+
+        list(err = NULL, df = result)
+      }, error = function(e) {
+        list(err = paste0("Sentiment analysis failed: ", conditionMessage(e)), df = NULL)
+      })
     })
 
     output$sentiment_summary <- renderUI({
-      req(sentiment_df())
-      df <- sentiment_df()
+      req(show_text(), text_data())
+      sr  <- sent_result()
+      err <- sr$err
 
-      if (nrow(df) == 0) {
-        return(p(style = "color:#888;",
-                 "No sentiment words matched. Ensure the textdata package is installed and the column contains English text."))
+      if (!is.null(err)) {
+        return(div(style = "color:#ff9944; padding:12px; background:#1a0d00; border-radius:6px;",
+                   tags$strong("Sentiment unavailable: "), err))
       }
 
+      df    <- sr$df
       n_pos <- sum(df$sentiment == "positive")
       n_neg <- sum(df$sentiment == "negative")
       net   <- n_pos - n_neg
@@ -346,17 +345,18 @@ textRServer <- function(id, dataset, reset_trigger, report_rv = NULL) {
       )
     })
 
-    output$sentiment_plot <- renderPlot({
-      req(sentiment_df(), nrow(sentiment_df()) > 0)
-      df <- sentiment_df()
-
+    sentiment_plot_obj <- reactive({
+      req(text_data())
+      sr  <- sent_result()
+      validate(
+        need(is.null(sr$err), sr$err %||% "Sentiment lexicon unavailable."),
+        need(!is.null(sr$df) && nrow(sr$df) > 0, "No sentiment words matched.")
+      )
+      df      <- sr$df
       pos_df  <- df[df$sentiment == "positive", ]
       neg_df  <- df[df$sentiment == "negative", ]
-      top_pos <- dplyr::count(pos_df, word, sort = TRUE)
-      top_pos <- head(top_pos, 10)
-      top_neg <- dplyr::count(neg_df, word, sort = TRUE)
-      top_neg <- head(top_neg, 10)
-
+      top_pos <- head(dplyr::count(pos_df, word, sort = TRUE), 10)
+      top_neg <- head(dplyr::count(neg_df, word, sort = TRUE), 10)
       top_pos$sentiment <- "positive"
       top_neg$sentiment <- "negative"
       plot_df           <- rbind(top_pos, top_neg)
@@ -371,14 +371,51 @@ textRServer <- function(id, dataset, reset_trigger, report_rv = NULL) {
                       x = NULL, y = "Count", fill = "Sentiment")
     })
 
+    output$sentiment_plot <- renderPlot({
+      req(show_text())
+      sr <- sent_result()
+      validate(need(is.null(sr$err), sr$err %||% "Sentiment unavailable."))
+      sentiment_plot_obj()
+    })
+
     output$sentiment_table <- renderDT({
-      req(sentiment_df(), nrow(sentiment_df()) > 0)
-      df <- sentiment_df()
-      wc <- dplyr::count(df, word, sentiment, sort = TRUE)
+      req(show_text())
+      sr <- sent_result()
+      validate(need(is.null(sr$err),           sr$err %||% "Sentiment unavailable."),
+               need(!is.null(sr$df) && nrow(sr$df) > 0, "No sentiment words matched."))
+      wc <- dplyr::count(sr$df, word, sentiment, sort = TRUE)
       names(wc) <- c("Word", "Sentiment", "Count")
       datatable(wc, rownames = FALSE,
         options = list(pageLength = 15, scrollX = TRUE, dom = "ftp"),
         class = "display compact cell-border stripe hover")
     })
+
+    # ── Push results to report_rv when analysis completes ─────────────
+    observeEvent(text_data(), {
+      if (is.null(report_rv) || is.null(text_data())) return()
+
+      report_rv$text_col    <- text_data()$col
+      report_rv$text_freq   <- tryCatch(freq_df(),   error = function(e) NULL)
+      report_rv$text_ngrams <- tryCatch(ngram_df(),  error = function(e) NULL)
+
+      report_rv$text_plots <- list(
+        freq      = tryCatch(freq_plot_obj(),     error = function(e) NULL),
+        ngrams    = tryCatch(ngram_plot_obj(),    error = function(e) NULL),
+        sentiment = tryCatch(sentiment_plot_obj(), error = function(e) NULL)
+      )
+
+      sr <- tryCatch(sent_result(), error = function(e) list(err = conditionMessage(e), df = NULL))
+      if (is.null(sr$err) && !is.null(sr$df) && nrow(sr$df) > 0) {
+        report_rv$text_sentiment <- list(
+          n_pos = sum(sr$df$sentiment == "positive"),
+          n_neg = sum(sr$df$sentiment == "negative"),
+          net   = sum(sr$df$sentiment == "positive") - sum(sr$df$sentiment == "negative"),
+          df    = sr$df
+        )
+      } else {
+        report_rv$text_sentiment <- NULL
+      }
+    }, ignoreNULL = TRUE, ignoreInit = TRUE)
+
   })
 }

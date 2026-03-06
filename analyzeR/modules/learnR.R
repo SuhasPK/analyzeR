@@ -83,6 +83,7 @@
     library(ranger)
     library(e1071)
     library(class)
+    library(nnet)
   })
 
   # Local copy — can't reference outer scope in subprocess
@@ -102,13 +103,23 @@
     preds <- as.numeric(predict(m, newdata = xdf))
 
   } else if (algo == "Logistic Regression") {
-    nl <- nlevels(tdf[[lr_target]])
-    if (nl != 2L) stop(sprintf("Binary only \u2014 dataset has %d classes.", nl))
-    m    <- glm(as.formula(paste0("`", lr_target, "` ~ .")),
-                data = tdf, family = binomial())
-    prob <- predict(m, newdata = xdf, type = "response")
-    lvl  <- levels(tdf[[lr_target]])
-    preds <- factor(ifelse(prob > 0.5, lvl[2], lvl[1]), levels = lvl)
+    nl  <- nlevels(tdf[[lr_target]])
+    lvl <- levels(tdf[[lr_target]])
+    if (nl == 2L) {
+      # Binary — standard logistic regression
+      m     <- glm(as.formula(paste0("`", lr_target, "` ~ .")),
+                   data = tdf, family = binomial())
+      prob  <- predict(m, newdata = xdf, type = "response")
+      preds <- factor(ifelse(prob > 0.5, lvl[2], lvl[1]), levels = lvl)
+    } else {
+      # Multi-class — multinomial logistic regression via nnet
+      m     <- nnet::multinom(as.formula(paste0("`", lr_target, "` ~ .")),
+                              data = tdf, trace = FALSE, MaxNWts = 20000L)
+      # Use nnet::predict.multinom explicitly so it works even if nnet is not
+      # attached in the calling environment (callr subprocess has it loaded here)
+      preds <- factor(nnet::predict.multinom(m, newdata = xdf, type = "class"),
+                      levels = lvl)
+    }
 
   } else if (algo == "Decision Tree") {
     mth   <- if (pt == "Regression") "anova" else "class"
@@ -1016,9 +1027,12 @@ learnRServer <- function(id, dataset, reset_trigger, report_rv = NULL, monitor_r
     })
 
     output$cm_plot <- renderPlot({
-      req(input$detail_model, store$preds_test[[input$detail_model]], store$test_df)
+      req(input$detail_model, store$test_df)
       algo   <- input$detail_model
-      preds  <- store$preds_test[[algo]]; actual <- store$test_df$.actual
+      preds  <- store$preds_test[[algo]]
+      validate(need(!is.null(preds) && length(preds) > 0,
+                    paste0("No predictions stored for ", algo, ".")))
+      actual <- store$test_df$.actual
       lv     <- union(levels(as.factor(actual)), levels(as.factor(preds)))
       cm_df  <- as.data.frame(table(Predicted = factor(preds, levels=lv),
                                     Actual    = factor(actual, levels=lv)))
@@ -1112,10 +1126,15 @@ learnRServer <- function(id, dataset, reset_trigger, report_rv = NULL, monitor_r
     pred_results <- eventReactive(input$predict_btn, {
       req(store$trained, store$feat_cols, dataset())
       fcols <- store$feat_cols
-      new_row <- as.data.frame(setNames(lapply(fcols, function(col) {
-        val <- input[[paste0("pred_", make.names(col))]]
-        if (store$feat_types[[col]] == "numeric") as.numeric(val) else val
-      }), fcols), stringsAsFactors = FALSE)
+      new_row <- tryCatch(
+        as.data.frame(setNames(lapply(fcols, function(col) {
+          val <- input[[paste0("pred_", make.names(col))]]
+          if (store$feat_types[[col]] == "numeric") as.numeric(val %||% NA) else (val %||% "")
+        }), fcols), stringsAsFactors = FALSE),
+        error = function(e) NULL
+      )
+      validate(need(!is.null(new_row) && nrow(new_row) > 0,
+                    "Prediction inputs not ready \u2014 fill in all fields above."))
       for (col in fcols)
         if (is.factor(store$tdf[[col]]))
           new_row[[col]] <- factor(new_row[[col]], levels = levels(store$tdf[[col]]))
@@ -1130,9 +1149,13 @@ learnRServer <- function(id, dataset, reset_trigger, report_rv = NULL, monitor_r
                                     test=new_row[,num_c,drop=FALSE],
                                     cl=store$tdf[[.LR_TARGET]], k=5L))
           } else if (algo == "Logistic Regression") {
-            prob <- predict(m, newdata=new_row, type="response")
-            lvl  <- levels(store$tdf[[.LR_TARGET]])
-            as.character(ifelse(prob > 0.5, lvl[2], lvl[1]))
+            if (inherits(m, "multinom")) {
+              as.character(predict(m, newdata=new_row, type="class"))
+            } else {
+              prob <- predict(m, newdata=new_row, type="response")
+              lvl  <- levels(store$tdf[[.LR_TARGET]])
+              as.character(ifelse(prob > 0.5, lvl[2], lvl[1]))
+            }
           } else if (algo == "Decision Tree") {
             tp <- if (store$pt == "Regression") "vector" else "class"
             as.character(predict(m, newdata=new_row, type=tp))

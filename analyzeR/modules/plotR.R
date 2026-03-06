@@ -257,13 +257,22 @@ plotRServer <- function(id, dataset, reset_trigger, report_rv = NULL) {
                 value = rng,    step = max(stp, .Machine$double.eps))
             } else {
               lvls <- sort(unique(as.character(x[!is.na(x)])))
-              if (length(lvls) <= 10) {
-                checkboxGroupInput(ns(paste0("flevels_", lid)), NULL,
-                  choices  = lvls, selected = lvls, inline = TRUE)
+              if (length(lvls) <= 15) {
+                div(style = "max-height:200px; overflow-y:auto; padding:4px 0;",
+                  checkboxGroupInput(ns(paste0("flevels_", lid)), NULL,
+                    choices  = lvls, selected = lvls, inline = FALSE)
+                )
               } else {
-                selectInput(ns(paste0("flevels_", lid)), NULL,
-                  choices   = lvls, selected  = lvls,
-                  multiple  = TRUE, selectize = TRUE)
+                tagList(
+                  p(style = "color:#888; font-size:11px; margin:2px 0 4px;",
+                    "Leave empty to include all \u2014 select specific values to filter"),
+                  div(style = "max-height:180px; overflow-y:auto;",
+                    selectInput(ns(paste0("flevels_", lid)), NULL,
+                      choices   = lvls, selected  = NULL,
+                      multiple  = TRUE, selectize = FALSE,
+                      size      = min(length(lvls), 10L))
+                  )
+                )
               }
             }
           })
