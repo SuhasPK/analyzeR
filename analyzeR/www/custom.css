@@ -1,51 +1,612 @@
+/* ── Fonts ─────────────────────────────────────────────────────────── */
+body, h1, h2, h3, h4, h5, h6, p, label, .btn,
+input, select, textarea, .selectize-input {
+  font-family: 'Ubuntu Mono', monospace;
+}
+
+/* ── Base ──────────────────────────────────────────────────────────── */
+body {
+  background-color: #0d0d0d;
+  color: #f0f0f0;
+  font-size: 16px;
+}
+
+p     { font-size: 15px; color: #e8e8e8; line-height: 1.6; }
+h4    { font-size: 17px; color: #f4f4f4; margin-bottom: 10px; }
+h5    { font-size: 16px; color: #f0f0f0; margin-bottom: 8px; }
+label { font-size: 15px; color: #eeeeee; }
+
+/* ── Navbar (cyborg theme override) ───────────────────────────────── */
 .navbar-default {
-  background-color: #00ff00	;
-  border-color: red;
+  background-color: #111 !important;
+  border-color: #1e1e1e !important;
+}
+.navbar-default .navbar-nav > li > a { color: #ccc !important; }
+.navbar-default .navbar-brand        { color: #00ff00 !important; }
+
+/* ── App Header ────────────────────────────────────────────────────── */
+.app-header {
+  text-align: center;
+  padding: 28px 0 18px;
+  border-bottom: 1px solid #1e1e1e;
+  margin-bottom: 20px;
 }
 
-.navbar-default .navbar-nav > li > a {
-  color: black;  /* Adjust text color as needed */
+.app-title {
+  font-size: 34px;
+  font-weight: bold;
+  color: #00ff00;
+  letter-spacing: 4px;
 }
 
-.navbar-default .navbar-brand {
-  color: black;  /* Adjust brand color as needed */
+.app-subtitle {
+  font-size: 13px;
+  color: #aaa;
+  letter-spacing: 5px;
+  margin-top: 6px;
 }
 
+/* ── Main Content ──────────────────────────────────────────────────── */
+.main-content {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px 32px;
+}
 
-/* Change the background color and text color of the file input field */
+/* ── Tabs ──────────────────────────────────────────────────────────── */
+.nav-tabs {
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.nav-tabs .nav-link {
+  color: #bbb !important;
+  font-size: 15px;
+  border: none !important;
+  background: transparent !important;
+  padding: 8px 14px;
+  border-bottom: 2px solid transparent !important;
+}
+
+.nav-tabs .nav-link:hover {
+  color: #f0f0f0 !important;
+  border-bottom-color: #555 !important;
+}
+
+.nav-tabs .nav-link.active {
+  color: #00ff00 !important;
+  background: transparent !important;
+  border-bottom: 2px solid #00ff00 !important;
+}
+
+.tab-content { padding-top: 16px; }
+
+/* ── Buttons ───────────────────────────────────────────────────────── */
+.btn {
+  font-size: 15px;
+  padding: 6px 16px;
+  border-radius: 4px;
+}
+
+.btn-primary {
+  background-color: #007a2e;
+  border-color: #007a2e;
+  color: #fff;
+}
+.btn-primary:hover, .btn-primary:focus {
+  background-color: #006124;
+  border-color: #006124;
+  color: #fff;
+}
+
+/* ── Form controls ─────────────────────────────────────────────────── */
+.form-control,
 input[type="text"].form-control,
+input[type="number"].form-control,
 input[type="file"].form-control {
-  background-color: black !important;  /* Changes the background color to black */
-  color: white !important;             /* Changes the text color to white */
-  border-color: white !important;      /* Changes the border color to black */
+  background-color: #161616 !important;
+  color: #f0f0f0 !important;
+  border-color: #2a2a2a !important;
+  font-size: 15px;
 }
 
-.dataTables_wrapper .dataTables_length, 
-.dataTables_wrapper .dataTables_filter {
-  text-align: right;
+.selectize-input {
+  background-color: #161616 !important;
+  border-color: #2a2a2a !important;
+  color: #f0f0f0 !important;
+  font-size: 15px;
+}
+
+.selectize-dropdown {
+  background-color: #161616 !important;
+  border-color: #2a2a2a !important;
+  color: #f0f0f0 !important;
+  font-size: 15px;
+}
+
+.selectize-dropdown .active {
+  background-color: #00200d !important;
+  color: #00ff00 !important;
+}
+
+/* ── Sliders ───────────────────────────────────────────────────────── */
+.irs--shiny .irs-bar       { background: #00ff00; border-color: #00ff00; }
+.irs--shiny .irs-handle    { background: #00ff00; border-color: #009900; }
+.irs--shiny .irs-from,
+.irs--shiny .irs-to,
+.irs--shiny .irs-single    { background: #007a2e; }
+.irs--shiny .irs-line      { background: #2a2a2a; }
+.irs--shiny .irs-grid-text { color: #aaa; }
+
+/* ── File info badges ──────────────────────────────────────────────── */
+.file-info-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 8px 0 16px;
+}
+
+.file-info-badge {
+  background: #141414;
+  border: 1px solid #252525;
+  border-radius: 4px;
+  padding: 3px 10px;
+  font-size: 14px;
+  color: #bbb;
+  word-break: break-all;
+  max-width: 360px;
+}
+
+.file-info-badge span {
+  color: #ffffff;
+  margin-left: 5px;
+}
+
+/* ── Dataset metadata panel (loadR / readR) ────────────────────────── */
+.dataset-meta-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0 20px;
+}
+
+.meta-card {
+  background: #141414;
+  border: 1px solid #252525;
+  border-radius: 6px;
+  padding: 10px 18px;
+  min-width: 90px;
+  flex: 1 1 auto;
+}
+
+.meta-label {
+  display: block;
+  font-size: 11px;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+}
+
+.meta-value {
+  display: block;
+  font-size: 20px;
+  color: #ffffff;
+  font-weight: bold;
+  word-break: break-word;
+}
+
+.meta-warn { color: #ff9900 !important; }
+
+/* ── Status badge (removeR) ────────────────────────────────────────── */
+.status-badge {
+  display: inline-block;
+  border-radius: 4px;
+  padding: 5px 14px;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.status-empty  { background: #1a1a1a; color: #aaa; border: 1px solid #2a2a2a; }
+.status-loaded { background: #001a08; color: #00cc44; border: 1px solid #003a14; }
+
+/* ── DataTables ────────────────────────────────────────────────────── */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate {
+  color: #ddd !important;
+  font-size: 14px;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+  background-color: #161616 !important;
+  border-color: #2a2a2a !important;
+  color: #f0f0f0 !important;
 }
 
 table.dataTable {
   width: 100% !important;
-  margin: 0 auto;
+  background-color: transparent !important;
 }
 
-table.dataTable th, 
+table.dataTable th,
 table.dataTable td {
+  font-size: 14px;
+  color: #eeeeee;
   white-space: nowrap;
   text-align: center;
 }
 
 table.dataTable thead th {
-  background-color: #343a40;
-  color: white;
+  background-color: #161616 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #2a2a2a !important;
 }
 
-table.dataTable td, table.dataTable th {
+table.dataTable.stripe tbody tr.odd,
+table.dataTable.display tbody tr.odd {
+  background-color: #0f0f0f !important;
+}
+
+table.dataTable tbody tr:hover {
+  background-color: #181818 !important;
+}
+
+/* ── DT wrapping override (.dt-wrap container) ─────────────────────── */
+/* Wrap cells in tables that contain long text (recommendations, etc.) */
+.dt-wrap table.dataTable th,
+.dt-wrap table.dataTable td {
+  white-space: normal !important;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* ── Type recommendation badges (cleanR) ───────────────────────────── */
+.rec-badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-family: 'Ubuntu Mono', monospace;
+  word-break: break-word;
+}
+
+.rec-ok   { background: #001a08; color: #00cc44; border: 1px solid #003a14; }
+.rec-warn { background: #1a1000; color: #cc8800; border: 1px solid #3a2500; }
+.rec-info { background: #001020; color: #4499cc; border: 1px solid #003050; }
+
+/* ── Verbatim / pre output ─────────────────────────────────────────── */
+pre.shiny-text-output {
+  background-color: #111;
+  border: 1px solid #2a2a2a;
+  color: #eeeeee;
   font-size: 14px;
+  border-radius: 4px;
+  padding: 10px 14px;
+  /* Fix text overflow / leaking */
+  white-space: pre-wrap !important;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  overflow-x: auto;
 }
 
+/* ── Home page ─────────────────────────────────────────────────────── */
+a[href*="github.com"]:hover {
+  border-color: #00ff00 !important;
+  color: #00ff00 !important;
+}
+a[href*="github.com"]:hover svg { fill: #00ff00; }
+
+/* ── HR dividers ───────────────────────────────────────────────────── */
+hr { border-color: #2a2a2a; }
+
+/* ── Modals ────────────────────────────────────────────────────────── */
+.modal-content {
+  background-color: #161616;
+  border: 1px solid #2a2a2a;
+}
+.modal-header {
+  border-bottom: 1px solid #2a2a2a;
+}
+
+/* ── Shiny progress bar ─────────────────────────────────────────────── */
+.shiny-progress-container {
+  bottom: 24px !important;
+  right: 24px !important;
+  width: 260px !important;
+}
+
+.shiny-progress {
+  background-color: #141414 !important;
+  border: 1px solid #252525 !important;
+  border-radius: 6px !important;
+  padding: 10px 14px 8px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7) !important;
+}
+
+.shiny-progress .progress {
+  height: 4px;
+  background-color: #1e1e1e;
+  border-radius: 2px;
+  margin: 6px 0 4px;
+  overflow: hidden;
+}
+
+.shiny-progress .progress-bar {
+  background-color: #00ff00 !important;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 6px rgba(0, 255, 0, 0.4);
+}
+
+.shiny-progress .progress-message {
+  color: #f0f0f0 !important;
+  font-size: 14px;
+  font-family: 'Ubuntu Mono', monospace;
+}
+
+.shiny-progress .progress-detail {
+  color: #ccc !important;
+  font-size: 13px;
+  font-family: 'Ubuntu Mono', monospace;
+  margin-top: 2px;
+}
+
+/* ── Notifications ─────────────────────────────────────────────────── */
 .shiny-notification {
+  font-family: 'Ubuntu Mono', monospace;
   font-size: 14px;
+  background-color: #161616;
+  border: 1px solid #2a2a2a;
+  color: #f0f0f0;
+}
+
+/* ── Dataset status badge (app header) ─────────────────────────────── */
+.ds-status {
+  display: inline-block;
+  padding: 3px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  margin-top: 10px;
+}
+
+.ds-status-empty {
+  background: #161616;
+  color: #444;
+  border: 1px solid #252525;
+}
+
+.ds-status-loaded {
+  background: #001a08;
+  color: #00cc44;
+  border: 1px solid #003a14;
+}
+
+/* ── No-data prompt ─────────────────────────────────────────────────── */
+.no-data-prompt {
+  text-align: center;
+  padding: 48px 24px 40px;
+  border: 1px dashed #252525;
+  border-radius: 8px;
+  margin: 8px 0 24px;
+  background: #0b0b0b;
+}
+
+.no-data-icon {
+  font-size: 32px;
+  color: #2a2a2a;
+  display: block;
+  margin-bottom: 14px;
+  line-height: 1;
+}
+
+.no-data-prompt h4 {
+  color: #555;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.no-data-prompt p {
+  color: #444;
+  font-size: 14px;
+  margin: 0;
+}
+
+.no-data-prompt strong {
+  color: #00aa33;
+}
+
+/* ── Buttons — disabled state ───────────────────────────────────────── */
+.btn:disabled,
+.btn[disabled],
+.btn.disabled {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+/* ── Buttons — hover / active polish ───────────────────────────────── */
+.btn-warning {
+  background-color: #7a5500;
+  border-color: #7a5500;
+  color: #fff;
+}
+.btn-warning:hover, .btn-warning:focus {
+  background-color: #614300;
+  border-color: #614300;
+  color: #fff;
+}
+
+.btn-danger {
+  background-color: #7a0000;
+  border-color: #7a0000;
+  color: #fff;
+}
+.btn-danger:hover, .btn-danger:focus {
+  background-color: #600000;
+  border-color: #600000;
+  color: #fff;
+}
+
+.btn-secondary {
+  background-color: #2a2a2a;
+  border-color: #3a3a3a;
+  color: #ccc;
+}
+.btn-secondary:hover, .btn-secondary:focus {
+  background-color: #333;
+  border-color: #444;
+  color: #f0f0f0;
+}
+
+.btn-success {
+  background-color: #005a1e;
+  border-color: #005a1e;
+  color: #fff;
+}
+.btn-success:hover, .btn-success:focus {
+  background-color: #004416;
+  border-color: #004416;
+  color: #fff;
+}
+
+/* ── Modal polish ───────────────────────────────────────────────────── */
+.modal-title {
+  color: #f0f0f0;
+  font-family: 'Ubuntu Mono', monospace;
+}
+
+.modal-body {
+  color: #e0e0e0;
+  font-size: 15px;
+}
+
+.modal-footer {
+  border-top: 1px solid #2a2a2a;
+}
+
+/* ── shinycssloaders spinner theme ─────────────────────────────────── */
+/* Make spinner containers transparent so the dark background shows through */
+.shiny-spinner-output-container {
+  min-height: 60px;
+}
+
+/* Rotating-plane spinner (type 8) dark-theme overrides */
+.sk-rotating-plane {
+  background-color: #00ff00 !important;
+}
+
+/* Override white background that some spinner types add */
+.load-container .loader {
+  background: transparent !important;
+}
+
+
+/* ── MonitR widget (fixed bottom bar) ──────────────────────────────── */
+
+/* Push page content above the fixed bar */
+body { padding-bottom: 44px; }
+
+#monitr-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: #0a0a0a;
+  border-top: 1px solid #1e1e1e;
+  font-family: 'Ubuntu Mono', monospace;
+}
+
+.monitr-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 16px;
+  height: 36px;
+}
+
+.monitr-toggle-btn {
+  background: none;
+  border: 1px solid #2a2a2a;
+  color: #00ff00;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 10px;
+  padding: 2px 7px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.monitr-toggle-btn:hover {
+  background: #1a1a1a;
+  border-color: #00ff00;
+}
+
+.monitr-label {
+  color: #00ff00;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+.monitr-stat {
+  color: #999;
+  font-size: 12px;
+}
+
+.monitr-sep {
+  color: #2a2a2a;
+  font-size: 12px;
+}
+
+/* Make the Shiny output wrapper inline inside the flex header */
+#monitr_stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#monitr-panel {
+  background: #0d0d0d;
+  border-top: 1px solid #1a1a1a;
+  padding: 8px 16px 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.monitr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-family: 'Ubuntu Mono', monospace;
+}
+
+.monitr-table th {
+  color: #444;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  padding: 0 16px 5px 0;
+  text-align: left;
+  border-bottom: 1px solid #1e1e1e;
+}
+
+.monitr-table td {
+  color: #bbb;
+  padding: 4px 16px 4px 0;
+  border-bottom: 1px solid #111;
+  white-space: nowrap;
+}
+
+.monitr-table td:first-child {
+  color: #00ff00;
+  font-weight: bold;
+}
+
+.monitr-table tr:last-child td {
+  border-bottom: none;
 }
 

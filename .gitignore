@@ -47,3 +47,19 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# renv — commit renv.lock but not the local package cache
+renv/library/
+renv/staging/
+renv/sandbox/
+.renv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Large user-uploaded data (keep the sample files in analyzeR/data/)
+analyzeR/uploads/
